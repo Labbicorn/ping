@@ -2,15 +2,18 @@ import * as Web3 from '@solana/web3.js';
 import * as fs from 'fs';
 import dotenv from 'dotenv';
 import * as anchor from '@project-serum/anchor';
-import { Ping, IDL } from "./ping";
-// import idl from './ping.json';
+import idl from "../idl/ping.json";
 dotenv.config();
 
-const PROGRAM_ID = new Web3.PublicKey("HRNYzci93tZFbBRSdJHN6GDTzyjRp96qLNkgfBPDA4Tz");
+const PROGRAM_ID = new Web3.PublicKey(idl.metadata.address);
 
 async function main() {
-  const connection = new Web3.Connection("http://localhost:8899", 'confirmed');
-  const signer = await initializeKeypair();
+  const connection = new Web3.Connection("http://127.0.0.1:8899", 'confirmed');
+  // const signer = await initializeKeypair();
+
+  const secret = JSON.parse(fs.readFileSync('/Users/davirain/.config/solana/id.json', 'utf8')) as number[];
+  const secretKey = Uint8Array.from(secret);
+  const signer = Web3.Keypair.fromSecretKey(secretKey);
 
   console.log("公钥:", signer.publicKey.toBase58());
 
@@ -20,12 +23,12 @@ async function main() {
   anchor.setProvider(provider);
 
   console.log("programId:", PROGRAM_ID.toBase58());
-  const program = new anchor.Program(IDL as anchor.Idl, PROGRAM_ID, provider);
+  const program = new anchor.Program(idl as anchor.Idl, PROGRAM_ID, provider);
   // console.log("program ", program);
 
   // await PingInit(program, signer);
 
-  // await pingProgram(connection, signer);
+  await Ping(program, signer);
 }
 
 main()
@@ -97,6 +100,26 @@ async function PingInit(program: anchor.Program, payer: Web3.Keypair) {
       pingName: pingAccount,
       user: payer.publicKey,
       systemProgram: anchor.web3.SystemProgram.programId,
+    })
+    .rpc();
+
+  console.log(
+    `Transaction https://explorer.solana.com/tx/${transactionSignature}?cluster=custom`
+  )
+}
+
+async function Ping(program: anchor.Program, payer: Web3.Keypair) {
+  let [pingAccount] = anchor.web3.PublicKey.findProgramAddressSync(
+    [Buffer.from("ping")],
+    PROGRAM_ID
+  );
+  console.log("pingAccount:", pingAccount.toBase58());
+
+  const transactionSignature = await program.methods
+    .ping()
+    .accounts({
+      pingName: pingAccount,
+      user: payer.publicKey,
     })
     .rpc();
 
