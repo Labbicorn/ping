@@ -1,7 +1,7 @@
 import * as Web3 from '@solana/web3.js';
 import * as fs from 'fs';
 import dotenv from 'dotenv';
-import * as anchor from '@coral-xyz/anchor';
+import * as anchor from '@project-serum/anchor';
 import { Ping, IDL } from "./ping";
 // import idl from './ping.json';
 dotenv.config();
@@ -20,7 +20,7 @@ async function main() {
   anchor.setProvider(provider);
 
   console.log("programId:", PROGRAM_ID.toBase58());
-  // const program = new anchor.Program(IDL as anchor.Idl, PROGRAM_ID, provider);
+  const program = new anchor.Program(IDL as anchor.Idl, PROGRAM_ID, provider);
   // console.log("program ", program);
 
   // await PingInit(program, signer);
