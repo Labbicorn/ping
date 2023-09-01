@@ -9,11 +9,11 @@ const PROGRAM_ID = new Web3.PublicKey(idl.metadata.address);
 
 async function main() {
   const connection = new Web3.Connection("http://127.0.0.1:8899", 'confirmed');
-  // const signer = await initializeKeypair();
+  const signer = await initializeKeypair();
 
-  const secret = JSON.parse(fs.readFileSync('/Users/davirain/.config/solana/id.json', 'utf8')) as number[];
-  const secretKey = Uint8Array.from(secret);
-  const signer = Web3.Keypair.fromSecretKey(secretKey);
+  // const secret = JSON.parse(fs.readFileSync('/Users/davirain/.config/solana/id.json', 'utf8')) as number[];
+  // const secretKey = Uint8Array.from(secret);
+  // const signer = Web3.Keypair.fromSecretKey(secretKey);
 
   console.log("公钥:", signer.publicKey.toBase58());
 
