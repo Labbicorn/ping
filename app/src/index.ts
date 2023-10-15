@@ -2,10 +2,11 @@ import * as Web3 from '@solana/web3.js';
 import * as fs from 'fs';
 import dotenv from 'dotenv';
 import * as anchor from '@project-serum/anchor';
+import * as Borsh from "@project-serum/borsh"
 import idl from "../idl/ping.json";
 dotenv.config();
 
-const PROGRAM_ID = new Web3.PublicKey(idl.metadata.address);
+const PROGRAM_ID = new Web3.PublicKey("3ZfaRDMpfJFWiC9UR1Cs1oEDdopvN71jezU8QvgHjZXf");
 
 async function main() {
   const connection = new Web3.Connection("http://127.0.0.1:8899", 'confirmed');
@@ -28,7 +29,9 @@ async function main() {
 
   // await PingInit(program, signer);
 
-  await Ping(program, signer);
+  // await Ping(program, signer);
+
+  await update(program, signer, 10);
 }
 
 main()
@@ -117,6 +120,28 @@ async function Ping(program: anchor.Program, payer: Web3.Keypair) {
 
   const transactionSignature = await program.methods
     .ping()
+    .accounts({
+      pingName: pingAccount,
+      user: payer.publicKey,
+    })
+    .rpc();
+
+  console.log(
+    `Transaction https://explorer.solana.com/tx/${transactionSignature}?cluster=custom`
+  )
+}
+
+async function update(program: anchor.Program, payer: Web3.Keypair, num: number) {
+
+  let [pingAccount] = anchor.web3.PublicKey.findProgramAddressSync(
+    [Buffer.from("ping")],
+    PROGRAM_ID
+  );
+  console.log("pingAccount:", pingAccount.toBase58());
+
+  // this repo help me: https://github.com/coral-xyz/anchor/blob/master/examples/tutorial/basic-1/tests/basic-1.js
+  const transactionSignature = await program.methods
+    .update(new anchor.BN(num))
     .accounts({
       pingName: pingAccount,
       user: payer.publicKey,

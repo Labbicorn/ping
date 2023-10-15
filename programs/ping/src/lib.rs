@@ -1,7 +1,7 @@
 #![allow(clippy::result_large_err)]
 use anchor_lang::prelude::*;
 
-declare_id!("HRNYzci93tZFbBRSdJHN6GDTzyjRp96qLNkgfBPDA4Tz");
+declare_id!("3ZfaRDMpfJFWiC9UR1Cs1oEDdopvN71jezU8QvgHjZXf");
 
 #[program]
 pub mod ping {
@@ -20,6 +20,13 @@ pub mod ping {
         msg!("Ping {} times", ping_name.ping_counter);
         Ok(())
     }
+
+    pub fn update(ctx: Context<Update>, num: u64) -> Result<()> {
+        let ping_name = &mut ctx.accounts.ping_name;
+        ping_name.ping_counter = num;
+        msg!("update to {} ", ping_name.ping_counter);
+        Ok(())
+    }
 }
 
 #[derive(Accounts)]
@@ -35,7 +42,14 @@ pub struct Initialize<'info> {
 #[derive(Accounts)]
 pub struct Ping<'info> {
     #[account(mut, seeds = [b"ping"], bump)]
-    // #[account(mut, seeds = [], bump)]
+    pub ping_name: Account<'info, PingData>,
+    #[account(mut)]
+    pub user: Signer<'info>,
+}
+
+#[derive(Accounts)]
+pub struct Update<'info> {
+    #[account(mut, seeds = [b"ping"], bump)]
     pub ping_name: Account<'info, PingData>,
     #[account(mut)]
     pub user: Signer<'info>,
